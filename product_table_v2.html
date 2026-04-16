@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Product Table Comparison Part 2</title>
+
+<style>
+body 
+{
+  font-family: Arial;
+  background-color: orange;
+  margin: 0;
+}
+
+.header 
+{
+  background: black;
+  color: white;
+  padding: 20px;
+  margin: 20px;
+}
+
+.container 
+{
+  background: white;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+input 
+{
+  padding: 8px;
+  margin: 5px;
+}
+
+button 
+{
+  padding: 8px;
+  margin: 5px;
+  cursor: pointer;
+  background: orange;
+  border: none;
+  font-weight: bold;
+}
+
+button:hover 
+{
+  background: darkorange;
+}
+
+table 
+{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th 
+{
+  background: orange;
+}
+
+td, th 
+{
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>Product Table Comparison - Part 2</h2>
+</div>
+
+<div class="container">
+
+<h3>Add Product</h3>
+
+<input id="name" placeholder="Product Name">
+<input id="price" placeholder="Price">
+<input id="category" placeholder="Category">
+
+<br>
+
+<button onclick="addInner()">Add (innerHTML)</button>
+<button onclick="addDOM()">Add (DOM)</button>
+<button onclick="testInner()">Test innerHTML</button>
+<button onclick="testDOM()">Test DOM</button>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Price</th>
+<th>Category</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+</table>
+
+</div>
+
+<script>
+
+function generateManyProducts(count) 
+{
+  let products = [];
+  for (let i = 1; i <= count; i++) 
+  {
+    products.push(
+      {
+      name: "Product " + i,
+      price: Math.floor(Math.random() * 100),
+      category: "Category " + (i % 5 + 1)
+    });
+  }
+  return products;
+}
+
+function getInput() 
+{
+  return {
+    name: document.getElementById("name").value,
+    price: document.getElementById("price").value,
+    category: document.getElementById("category").value
+  };
+}
+
+function addInner() 
+{
+  let p = getInput();
+  let table = document.getElementById("tableBody");
+
+  table.innerHTML += `
+    <tr>
+      <td>${p.name}</td>
+      <td>${p.price}</td>
+      <td>${p.category}</td>
+      <td><button onclick="deleteRow(this)">Delete</button></td>
+    </tr>
+  `;
+}
+
+function addDOM() 
+{
+  let p = getInput();
+  let table = document.getElementById("tableBody");
+
+  let tr = document.createElement("tr");
+
+  [p.name, p.price, p.category].forEach(text => 
+  {
+    let td = document.createElement("td");
+    td.textContent = text;
+    tr.appendChild(td);
+  });
+
+  let td = document.createElement("td");
+  let btn = document.createElement("button");
+  btn.textContent = "Delete";
+  btn.onclick = () => tr.remove();
+
+  td.appendChild(btn);
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+}
+
+function deleteRow(btn) 
+{
+  btn.parentElement.parentElement.remove();
+}
+
+function testInner() 
+{
+  let table = document.getElementById("tableBody");
+  table.innerHTML = "";
+
+  let products = generateManyProducts(100);
+
+  console.time("innerHTML");
+
+  let rows = "";
+  products.forEach(p => 
+  {
+    rows += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td>${p.category}</td>
+        <td><button onclick="deleteRow(this)">Delete</button></td>
+      </tr>
+    `;
+  });
+
+  table.innerHTML = rows;
+
+  console.timeEnd("innerHTML");
+}
+
+function testDOM() 
+{
+  let table = document.getElementById("tableBody");
+  table.innerHTML = "";
+
+  let products = generateManyProducts(100);
+
+  console.time("DOM");
+
+  products.forEach(p => 
+  {
+    let tr = document.createElement("tr");
+
+    [p.name, p.price, p.category].forEach(text => 
+    {
+      let td = document.createElement("td");
+      td.textContent = text;
+      tr.appendChild(td);
+    });
+
+    let td = document.createElement("td");
+    let btn = document.createElement("button");
+    btn.textContent = "Delete";
+    btn.onclick = () => tr.remove();
+
+    td.appendChild(btn);
+    tr.appendChild(td);
+
+    table.appendChild(tr);
+  });
+
+  console.timeEnd("DOM");
+}
+
+</script>
+
+</body>
+</html>
+
+<!--
+Reflection:
+1. InnerHTML is easier to implement because it uses simple text formatting to add multiple elements in one operation. The implementation process requires less code and is faster than using direct DOM manipulation.
+2. The DOM approach is more secure because it uses textContent, meaning that all input will be treated as text by default, avoiding code execution. The usage of innerHTML can be very risky for security reasons because of XSS (Cross-Site Scripting) attack possibilities.
+3. Direct DOM manipulation will be better suited to use with users' input and secure web apps because of its safety. Moreover, it will allow the developer to control the elements precisely, for example, set an event listener on the particular DOM element.
+4. Possible downsides when using innerhtml such as Security vulnerabilities like XSS attacks, Decreased performance due to frequent updates, The loss of previously added event listeners, as inserting new innerHTML will replace all elements.
+-->
